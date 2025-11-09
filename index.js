@@ -369,6 +369,42 @@ app.get("/api/events", async (req, res) => {
   }
 });
 // New Api Start From Here...
+// no error showing but can not get data from data base,, need to fix this api later
+//  user's challenges data
+app.get("/api/user-challenges/user/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const userChallenges = await userChallengesCollection
+      .aggregate([
+        { $match: { userId } },
+        {
+          $lookup: {
+            from: "challenges",
+            localField: "challengeId",
+            foreignField: "_id",
+            as: "challenge"
+          }
+        },
+        { $unwind: "$challenge" },
+        { $sort: { lastUpdated: -1 } }
+      ])
+      .toArray();
+
+    res.json({
+      success: true,
+      data: userChallenges
+    });
+  } catch (error) {
+    console.error("Error fetching user challenges:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching user challenges"
+    });
+  }
+});
+// New Api From Here
+
 
 // i got some error then fix from AI
 // this api functionity and reqirements is critical to understand the concept for me,,,,,,
