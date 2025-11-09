@@ -148,32 +148,31 @@ const eventsCollection = db.collection("events");
 
 // new api start from here
 
-  // GET all tips
+                        //fetch a lot of git problem
+  // GET all tips Api
     app.get("/api/tips", async (req, res) => {
       try {
         const { category, sort = 'newest', page = 1, limit = 10 } = req.query;
 
-
         const filter = {};
         if (category) filter.category = category;
-
 
         let sortOption = { createdAt: -1 };
         if (sort === 'popular') {
           sortOption = { upvotes: -1, createdAt: -1 };
         }
 
-
         const skip = (parseInt(page) - 1) * parseInt(limit);
         
-
         const tips = await tipsCollection
           .find(filter)
           .sort(sortOption)
           .skip(skip)
           .limit(parseInt(limit))
           .toArray();
+
         const total = await tipsCollection.countDocuments(filter);
+
         res.json({
           success: true,
           data: tips,
@@ -192,7 +191,6 @@ const eventsCollection = db.collection("events");
         });
       }
     });
-
 
 
 app.get('/', (req, res) => {
