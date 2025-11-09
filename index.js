@@ -5,7 +5,7 @@ const port = 3000
 
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@eco-tracker.03zxqyv.mongodb.net/?appName=Eco-Tracker`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -51,15 +51,12 @@ const eventsCollection = db.collection("events");
           page = 1,
           limit = 10
         } = req.query;
-
         // filteringg object
         const filter = {};
-
         // Category - wise - filter
         if (category) {
           filter.category = { $in: category.split(',') };
         }
-
         // Participants range wise filtering
         if (participants_min || participants_max) {
           filter.participants = {};
@@ -116,6 +113,40 @@ const eventsCollection = db.collection("events");
         });
       }
     });
+//new api start from here
+ // GET single challenge by id filtering....
+    app.get("/api/challenges/:id", async (req, res) => {
+      try {
+        const { id } = req.params;
+        if (!ObjectId.isValid(id)) {
+          return res.status(400).json({
+            success: false,
+            message: "Invalid challenge ID"
+          });
+        }
+        const challenge = await challengesCollection.findOne({ 
+          _id: new ObjectId(id) 
+        });
+        if (!challenge) {
+          return res.status(404).json({
+            success: false,
+            message: "Challenge not found"
+          });
+        }
+        res.json({
+          success: true,
+          data: challenge
+        });
+      } catch (error) {
+        console.error("Error fetching challenge:", error);
+        res.status(500).json({
+          success: false,
+          message: "Error fetching challenge"
+        });
+      }
+    });
+
+// new api start from here
 
 
 
