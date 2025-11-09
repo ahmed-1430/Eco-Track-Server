@@ -186,6 +186,53 @@ app.post("/api/challenges", async (req, res) => {
 
 //New Api From here.....
 
+// tested with postman and working on postman 
+
+//  update challenge Data
+app.put("/api/challenges/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = req.body;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid challenge ID"
+      });
+    }
+
+    const filter = { _id: new ObjectId(id) };
+    const update = {
+      $set: {
+        ...data,
+        updatedAt: new Date()
+      }
+    };
+
+    const result = await challengesCollection.updateOne(filter, update);
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Challenge not found"
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Challenge updated successfully",
+      result
+    });
+  } catch (error) {
+    console.error("Error updating challenge:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error updating challenge"
+    });
+  }
+});
+// New Api Start from here.....
+
 
 //fetch a lot of git problem
 // GET all tips Api
