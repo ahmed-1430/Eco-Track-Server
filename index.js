@@ -148,6 +148,45 @@ app.get("/api/challenges/:id", async (req, res) => {
 
 // new api start from here
 
+// tested with postman api working....
+
+// create new challenge api
+app.post("/api/challenges", async (req, res) => {
+  try {
+    const challengeData = {
+      ...req.body,
+      participants: 0,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    // Basic validation
+    if (!challengeData.title || !challengeData.category || !challengeData.description) {
+      return res.status(400).json({
+        success: false,
+        message: "Title, category, and description are required"
+      });
+    }
+
+    const result = await challengesCollection.insertOne(challengeData);
+
+    res.status(201).json({
+      success: true,
+      message: "Challenge created successfully",
+      data: { ...challengeData, _id: result.insertedId }
+    });
+  } catch (error) {
+    console.error("Error creating challenge:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error creating challenge"
+    });
+  }
+});
+
+//New Api From here.....
+
+
 //fetch a lot of git problem
 // GET all tips Api
 app.get("/api/tips", async (req, res) => {
