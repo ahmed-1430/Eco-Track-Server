@@ -147,7 +147,52 @@ const eventsCollection = db.collection("events");
     });
 
 // new api start from here
+                          //right now its working properly with fake data,,, 
+  // GET all tips
+    app.get("/api/tips", async (req, res) => {
+      try {
+        const { category, sort = 'newest', page = 1, limit = 10 } = req.query;
 
+        const filter = {};
+        if (category) filter.category = category;
+
+
+        let sortOption = { createdAt: -1 };
+        if (sort === 'popular') {
+          sortOption = { upvotes: -1, createdAt: -1 };
+        }
+
+
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+        
+        const tips = await tipsCollection
+          .find(filter)
+          .sort(sortOption)
+          .skip(skip)
+          .limit(parseInt(limit))
+          .toArray();
+
+
+        const total = await tipsCollection.countDocuments(filter);
+
+        res.json({
+          success: true,
+          data: tips,
+          pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            total,
+            pages: Math.ceil(total / limit)
+          }
+        });
+      } catch (error) {
+        console.error("Error fetching tips:", error);
+        res.status(500).json({
+          success: false,
+          message: "Error fetching tips"
+        });
+      }
+    });
 
 
 app.get('/', (req, res) => {
