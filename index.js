@@ -233,6 +233,48 @@ app.put("/api/challenges/:id", async (req, res) => {
 });
 // New Api Start from here.....
 
+// Api working tested on postman app
+
+// dlete challenge Data Api
+app.delete("/api/challenges/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid challenge ID"
+      });
+    }
+
+
+    const result = await challengesCollection.deleteOne({
+      _id: new ObjectId(id)
+    });
+
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Challenge not found"
+      });
+    }
+
+
+    res.json({
+      success: true,
+      message: "Challenge deleted successfully"
+    });
+  } catch (error) {
+    console.error("Error deleting challenge:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error deleting challenge"
+    });
+  }
+});
+//New Api from Here....
+
 
 //fetch a lot of git problem
 // GET all tips Api
