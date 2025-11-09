@@ -369,7 +369,7 @@ app.get("/api/events", async (req, res) => {
   }
 });
 // New Api Start From Here...
-// no error showing but can not get data from data base,, need to fix this api later
+// no error showing but can not get data from data base,, need to fix this api later     (reminder for me!!!!!)
 //  user's challenges data
 app.get("/api/user-challenges/user/:userId", async (req, res) => {
   try {
@@ -404,6 +404,50 @@ app.get("/api/user-challenges/user/:userId", async (req, res) => {
   }
 });
 // New Api From Here
+// not showing error on console, after fix get api then  need manual test after implement on client side  (reminder for me!!!!!!)
+// update progress Api
+app.patch("/api/user-challenges/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { progress, status, impactAchieved } = req.body;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user challenge ID"
+      });
+    }
+
+    const updateData = { lastUpdated: new Date() };
+    if (progress !== undefined) updateData.progress = progress;
+    if (status) updateData.status = status;
+    if (impactAchieved !== undefined) updateData.impactAchieved = impactAchieved;
+
+    const result = await userChallengesCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updateData }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User challenge not found"
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Progress updated successfully"
+    });
+  } catch (error) {
+    console.error("Error updating progress:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error updating progress"
+    });
+  }
+});
+
 
 
 // i got some error then fix from AI
