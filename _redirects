@@ -1,0 +1,8 @@
+# Redirect all routes to index.html (for React Router / SPA)
+/*    /index.html   200
+
+# Example redirect
+/old-page     /new-page     301
+
+# External redirect
+/github       https://github.com/your-username/your-repo     302
