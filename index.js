@@ -40,6 +40,22 @@ const userChallengesCollection = db.collection("userChallenges");
 const tipsCollection = db.collection("tips");
 const eventsCollection = db.collection("events");
 
+// Challenges
+// GET /api/challenges — list (supports filters(challenged part))
+// ○ GET /api/challenges/:id — details
+// ○ POST /api/challenges — create
+// ○ PATCH /api/challenges/:id — update (owner/admin)
+// ○ DELETE /api/challenges/:id — delete (owner/admin)○ POST /api/challenges/join/:id — join challenge (protected) —
+// increments participants and associates user with challenge
+
+// i created all api mentioned in reqirements and apply all filters 
+
+
+
+
+
+
+
 // CHALLENGES API //
 // right now it works properly check by insert fake json data on database manually //
 // GET all challenges with filtering
@@ -278,6 +294,126 @@ app.delete("/api/challenges/:id", async (req, res) => {
 });
 //New Api from Here....
 
+// users Challenges Api filter by user's em
+app.get("/api/user-challenges/user/:email", async (req, res) => {
+  try {
+    const { email } = req.params;
+
+    const userChallenges = await userChallengesCollection
+      .aggregate([
+        { $match: { email } },
+        {
+          $lookup: {
+            from: "challenges",
+            localField: "challengeId",
+            foreignField: "_id",
+            as: "challenge"
+          }
+        },
+        { $unwind: "$challenge" },
+        { $sort: { lastUpdated: -1 } }
+      ])
+      .toArray();
+
+    res.json({
+      success: true,
+      data: userChallenges
+    });
+  } catch (error) {
+    console.error("Error fetching user challenges:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching user challenges"
+    });
+  }
+});
+// New api start from here
+
+// Join Challenge Api
+app.post("/api/challenges/join/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email } = req.body; 
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email is required" });
+    }
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: "Invalid challenge ID" });
+    }
+
+    const challenge = await challengesCollection.findOne({ _id: new ObjectId(id) });
+    if (!challenge) {
+      return res.status(404).json({ success: false, message: "Challenge not found" });
+    }
+
+
+    const alreadyJoined = await userChallengesCollection.findOne({
+      challengeId: challenge._id,
+      email
+    });
+
+    if (alreadyJoined) {
+      return res.status(400).json({ success: false, message: "You have already joined this challenge" });
+    }
+
+    const userChallenge = {
+      challengeId: challenge._id,
+      email,
+      progress: 0,
+      status: "active",
+      lastUpdated: new Date(),
+      impactAchieved: 0
+    };
+
+    await userChallengesCollection.insertOne(userChallenge);
+
+    await challengesCollection.updateOne(
+      { _id: challenge._id },
+      { $inc: { participants: 1 } }
+    );
+
+    res.status(201).json({ success: true, message: "You’ve successfully joined this challenge!" });
+  } catch (error) {
+    console.error("Error joining challenge:", error);
+    res.status(500).json({ success: false, message: "Failed to join challenge" });
+  }
+});
+
+// new api from here
+
+// PATCH user challenge progress
+app.patch("/api/user-challenges/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { progress, status } = req.body;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: "Invalid user challenge ID" });
+    }
+
+    const updateData = { lastUpdated: new Date() };
+    if (progress !== undefined) updateData.progress = progress;
+    if (status) updateData.status = status;
+
+    const result = await userChallengesCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updateData }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ success: false, message: "User challenge not found" });
+    }
+
+    res.json({ success: true, message: "Progress updated successfully" });
+  } catch (error) {
+    console.error("Error updating progress:", error);
+    res.status(500).json({ success: false, message: "Error updating progress" });
+  }
+});
+
+
 
 //fetch a lot of git problem
 // GET all tips Api
@@ -325,7 +461,6 @@ app.get("/api/tips", async (req, res) => {
 
 // new Api start from here.....
 
-// tested and working no error
 // GET all events Api
 app.get("/api/events", async (req, res) => {
   try {
@@ -372,7 +507,6 @@ app.get("/api/events", async (req, res) => {
   }
 });
 // New Api Start From Here...
-// no error showing but can not get data from data base,, need to fix this api later     (reminder for me!!!!!)
 //  user's challenges data
 app.get("/api/user-challenges/user/:userId", async (req, res) => {
   try {
@@ -407,7 +541,6 @@ app.get("/api/user-challenges/user/:userId", async (req, res) => {
   }
 });
 // New Api From Here
-// not showing error on console, after fix get api then  need manual test after implement on client side  (reminder for me!!!!!!)
 // update progress Api
 app.patch("/api/user-challenges/:id", async (req, res) => {
   try {
