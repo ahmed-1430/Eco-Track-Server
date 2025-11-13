@@ -1,6 +1,3 @@
-
-
-```
 # ⚙️ EcoTrack Server — RESTful API  
 
 The **EcoTrack Server** powers the backend of the **EcoTrack Sustainable Living Community**, managing data for challenges, events, and eco-tips.  
@@ -9,7 +6,7 @@ Built with **Express** and **MongoDB**, it provides a fast and secure RESTful AP
 ---
 
 ## 🔗 Live Server  
-**Base URL:** https://eco-track-server-zeta.vercel.app/ 
+**Base URL:** [Eco Track](https://eco-track-server-zeta.vercel.app/)  
 
 ---
 
@@ -32,11 +29,10 @@ Built with **Express** and **MongoDB**, it provides a fast and secure RESTful AP
 
 | Category | Technology |
 |-----------|-------------|
-| Server Framework | Express.js |
-| Database | MongoDB |
-| Security | dotenv |
-| CORS Handling | cors |
-| Deployment | Vercel |
+| Server Framework | 🚀 Express.js |
+| Database | 🍃 MongoDB |
+| Security | 🔐 dotenv |
+| CORS Handling | 🌍 cors |
+| Deployment | ▲ Vercel |
 
 ---
-
